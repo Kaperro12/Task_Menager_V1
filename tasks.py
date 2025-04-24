@@ -1,5 +1,4 @@
 class Zadanie:
-    """Podstawowa klasa reprezentująca zadanie."""
     def __init__(self, tytul, status="Do zrobienia"):
         self.tytul = tytul
         self.status = status
@@ -8,9 +7,13 @@ class Zadanie:
         return f"{self.tytul} ({self.status})"
 
 class TodoTask(Zadanie):
-    """Zadanie do wykonania."""
     def __init__(self, tytul):
         super().__init__(tytul, "Do zrobienia")
 
-# TODO: Dodać klasy InProgressTask i DoneTask
-# TODO: Dodać walidację danych
+class InProgressTask(Zadanie):
+    def __init__(self, tytul):
+        super().__init__(tytul, "W trakcie")
+
+class DoneTask(Zadanie):
+    def __init__(self, tytul):
+        super().__init__(tytul, "Wykonane")

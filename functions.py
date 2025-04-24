@@ -1,7 +1,9 @@
 import openpyxl
-from openpyxl.styles import PatternFill
-from tasks import TodoTask
+from openpyxl.styles import PatternFill, Font
+from tkinter import messagebox
+from tasks import TodoTask, InProgressTask, DoneTask
 
+# Stałe
 NAZWA_PLIKU = "Tasks.xlsx"
 KOLORY = {
     "Do zrobienia": "#FF9999",
@@ -9,9 +11,7 @@ KOLORY = {
     "Wykonane": "#99FF99"
 }
 
-
 def sprawdz_lub_utworz_plik():
-    """Sprawdza istnienie pliku Excel lub tworzy nowy z nagłówkami."""
     try:
         skoroszyt = openpyxl.load_workbook(NAZWA_PLIKU)
     except FileNotFoundError:
@@ -22,40 +22,69 @@ def sprawdz_lub_utworz_plik():
         skoroszyt.save(NAZWA_PLIKU)
     return skoroszyt
 
-
 def zaladuj_zadania():
-    """Ładuje listę zadań z pliku Excel."""
     skoroszyt = sprawdz_lub_utworz_plik()
     arkusz = skoroszyt.active
     zadania = []
-
     for wiersz in arkusz.iter_rows(min_row=2, values_only=True):
         tytul, status = wiersz
         if status == "Do zrobienia":
             zadania.append(TodoTask(tytul))
-        # TODO: Obsłużyć inne statusy zadań
-
+        elif status == "W trakcie":
+            zadania.append(InProgressTask(tytul))
+        elif status == "Wykonane":
+            zadania.append(DoneTask(tytul))
     return zadania
 
-
-def dodaj_zadanie(tytul):
-    """Dodaje nowe zadanie do pliku."""
-    zadania = zaladuj_zadania()
-    zadania.append(TodoTask(tytul))
-    zapisz_zadania(zadania)
-
-
 def zapisz_zadania(zadania):
-    """Zapisuje listę zadań do pliku Excel."""
     skoroszyt = openpyxl.Workbook()
     arkusz = skoroszyt.active
     arkusz.title = "Tasks"
     arkusz.append(["Title", "Status"])
+    arkusz.column_dimensions['A'].width = 30
+    arkusz.column_dimensions['B'].width = 15
 
     for zadanie in zadania:
         arkusz.append([zadanie.tytul, zadanie.status])
+        wypelnienie = PatternFill(start_color=KOLORY[zadanie.status][1:],
+                                end_color=KOLORY[zadanie.status][1:],
+                                fill_type="solid")
+
+        for komorka in arkusz.iter_rows(min_row=arkusz.max_row, max_row=arkusz.max_row, min_col=1, max_col=2):
+            for k in komorka:
+                k.fill = wypelnienie
+                if zadanie.status == "W trakcie":
+                    k.font = Font(bold=True)
 
     skoroszyt.save(NAZWA_PLIKU)
 
-# TODO: Dodać funkcje zmiany statusu zadań
-# TODO: Dodać formatowanie komórek Excel
+def dodaj_zadanie(tytul, app_instance=None):
+    zadania = zaladuj_zadania()
+    zadania.append(TodoTask(tytul))
+    zapisz_zadania(zadania)
+    if app_instance:
+        app_instance.odswiez_liste_zadan()
+
+def rozpocznij_zadanie(tytul, app_instance=None):
+    zadania = zaladuj_zadania()
+    for zadanie in zadania:
+        if zadanie.tytul == tytul and zadanie.status == "Do zrobienia":
+            zadanie.status = "W trakcie"
+            zapisz_zadania(zadania)
+            messagebox.showinfo("Sukces", f"Rozpoczęto zadanie: {tytul}")
+            if app_instance:
+                app_instance.odswiez_liste_zadan()
+            return
+    messagebox.showwarning("Ostrzeżenie", "Nie można rozpocząć tego zadania (nie istnieje lub ma niewłaściwy status)")
+
+def zakoncz_zadanie(tytul, app_instance=None):
+    zadania = zaladuj_zadania()
+    for zadanie in zadania:
+        if zadanie.tytul == tytul and zadanie.status == "W trakcie":
+            zadanie.status = "Wykonane"
+            zapisz_zadania(zadania)
+            messagebox.showinfo("Sukces", f"Zakończono zadanie: {tytul}")
+            if app_instance:
+                app_instance.odswiez_liste_zadan()
+            return
+    messagebox.showwarning("Ostrzeżenie", "Nie można zakończyć tego zadania (nie istnieje lub ma niewłaściwy status)")

@@ -9,9 +9,9 @@ from tasks import TodoTask, InProgressTask, DoneTask
 
 NAZWA_PLIKU = "Tasks.xlsx"
 KOLORY = {
-    "Do zrobienia": "#ff2323",
-    "W trakcie": "#ffc923",
-    "Wykonane": "#007200"
+    "Do zrobienia": "#F28B82",
+    "W trakcie": "#FBBC04",
+    "Wykonane": "#81C995"
 }
 
 

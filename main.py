@@ -437,7 +437,7 @@ class TaskManagerApp:
         self.tree.tag_configure("todo", background=KOLORY["Do zrobienia"])
         self.tree.tag_configure("in_progress", background=KOLORY["W trakcie"])
         self.tree.tag_configure("done", background=KOLORY["Wykonane"])
-        self.tree.tag_configure("overdue", foreground="red")
+        self.tree.tag_configure("overdue", foreground="#FF0000")
 
         # Odśwież statystyki
         self.odswiez_statystyki()

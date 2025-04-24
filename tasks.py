@@ -5,7 +5,7 @@ class Zadanie:
         self.tytul = tytul
         self.status = status
         self.data_utworzenia = datetime.now()
-        # TODO: W finalnej wersji dodać deadline i priorytet
+        self.deadline = None
 
     def __repr__(self):
         return f"{self.tytul} ({self.status})"
